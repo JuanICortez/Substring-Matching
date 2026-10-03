@@ -1,15 +1,11 @@
 import logging
 
-from utils import Token, TokenTypes, create_parser, setup_logging
+from utils import Token, TokenTypes, create_parser, get_target, setup_logging
 
 type Substitution = dict[str, int]
 
 
 logger = logging.getLogger(__name__)
-
-
-def get_target(targets: list[int], target_idx: int) -> str | None:
-    return targets[target_idx] if target_idx < len(targets) else None
 
 
 def dfs(

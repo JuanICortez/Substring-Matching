@@ -82,3 +82,7 @@ def setup_logging(level: str) -> None:
         format="%(message)s",
         handlers=[logging.StreamHandler(sys.stdout)],
     )
+
+
+def get_target(targets: list[int], target_idx: int) -> str | None:
+    return targets[target_idx] if target_idx < len(targets) else None
