@@ -28,79 +28,65 @@ def parse_pattern(pattern: str) -> list[Token]:
     return tokens
 
 
+def get_target(targets: list[int], target_idx: int) -> str | None:
+    return targets[target_idx] if target_idx < len(targets) else None
+
+
 def dfs(
-    P: list[Token],
-    P_idx: int,
-    T: list[int],
-    T_idx: int,
-    subst: Substitution,
-    used_idx: set[int],
+    P: list[Token], P_idx: int, T: list[int], T_idx: int, subst: Substitution
 ) -> Substitution | None:
 
     logger.debug(f"Indexes: {P_idx = }, {T_idx = }")
 
     if P_idx == len(P):
-        return subst if T_idx == len(T) else None
+        return subst if T_idx >= len(T) else None
 
-    if T_idx == len(T):
-        return (
-            subst
-            if P_idx not in used_idx and P[P_idx].type == TokenTypes.ELLIPSIS
-            else None
-        )
+    if T_idx > len(T):
+        return None
 
     pattern = P[P_idx]
-    target = T[T_idx]
+    target = get_target(T, T_idx)
 
     logger.debug(f"Value: {P[P_idx].value = }")
-    logger.debug(f"Target: {T[T_idx] = }")
+    logger.debug(f"Target = {target}")
     logger.debug(f"Substitutions: {subst = }\n")
 
     match pattern.type:
         case TokenTypes.NUM:
             if int(pattern.value) == target:
-                return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy(), used_idx)
+                return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy())
 
             return None
 
         case TokenTypes.VAR:
+            if target is None:
+                return None
+
             pattern_var = pattern.value
 
             if pattern_var not in subst:
                 subst[pattern_var] = target
-                return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy(), used_idx)
+                return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy())
 
             if subst[pattern_var] != target:
                 return None
 
-            return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy(), used_idx)
+            return dfs(P, P_idx + 1, T, T_idx + 1, subst.copy())
 
         case TokenTypes.ELLIPSIS:
             # Empty Case
-            if (
-                new_subst := dfs(P, P_idx + 1, T, T_idx, subst.copy(), used_idx)
-            ) is not None:
+            if (new_subst := dfs(P, P_idx + 1, T, T_idx, subst.copy())) is not None:
                 return new_subst
 
             # Ellipsis Matches One or More Elements
-            if (
-                new_subst := dfs(P, P_idx, T, T_idx + 1, subst.copy(), used_idx)
-            ) is not None:
-                return new_subst
-
-            used_idx.add(P_idx)
-
-            # Ellipsis Matched more that it needed, so we need to backtrack and try to match the next pattern
-            return dfs(P, P_idx + 1, T, T_idx, subst.copy(), used_idx)
+            return dfs(P, P_idx, T, T_idx + 1, subst.copy())
 
 
 def matching(pattern: list[Token], target: list[int]) -> Substitution | None:
     substitution: Substitution = {}
-    used: set[int] = set()
-
     logger.debug(f"Lenghts: {len(pattern) = }, {len(target) = }\n")
 
-    return dfs(pattern, 0, target, 0, substitution, used)
+    return dfs(pattern, 0, target, 0, substitution)
 
 
 def main() -> None:

@@ -28,7 +28,7 @@ def parse_pattern(pattern: str) -> list[Token]:
     return tokens
 
 
-def get_target(targets: list[str], target_idx: int) -> str | None:
+def get_target(targets: list[int], target_idx: int) -> str | None:
     return targets[target_idx] if target_idx < len(targets) else None
 
 
