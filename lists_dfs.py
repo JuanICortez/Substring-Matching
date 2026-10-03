@@ -27,6 +27,7 @@ def parse_pattern(pattern: str) -> list[Token]:
 
     return tokens
 
+
 def get_target(targets: list[str], target_idx: int) -> str | None:
     return targets[target_idx] if target_idx < len(targets) else None
 
@@ -75,37 +76,35 @@ def dfs(
                 subst[pattern_var] = [target]
                 return dfs(P, next_pattern, T, next_target, subst.copy(), seen)
 
-            if pattern_var not in seen:
-                # Variable already in substitution
-                subst[pattern_var].append(target)
-
-                # Eagerly try to append as many elements as possible
-                if (
-                    new_subst := dfs(
-                        P, next_pattern, T, next_target, subst.copy(), seen
-                    )
-                ) is not None:
-                    return new_subst
-
-                # Appended too many elements
-                subst[pattern_var].pop()
-                seen.add(pattern_var)
-
-                return dfs(P, P_idx + 1, T, T_idx, subst.copy(), seen)
-
-            # Matching with new instance of already seen variable
-            matched_list = subst[pattern_var]
-            matching_target = T_idx + len(matched_list)
-
-            if matching_target > len(T):
-                return None
+            # Variable already in substitution
             
-            if matched_list == T[T_idx : matching_target]:
-                return dfs(
-                    P, P_idx + 1, T, matching_target, subst.copy(), seen
-                )
+            if pattern_var in seen:
+                # Matching with new instance of already seen variable
+                matched_list = subst[pattern_var]
+                matching_target = T_idx + len(matched_list)
 
-            return None
+                if matching_target > len(T):
+                    return None
+
+                if matched_list == T[T_idx:matching_target]:
+                    return dfs(P, P_idx + 1, T, matching_target, subst.copy(), seen)
+
+                return None
+
+            # Still matching with first instance of variable
+            subst[pattern_var].append(target)
+
+            # Eagerly try to append as many elements as possible
+            if (
+                new_subst := dfs(P, next_pattern, T, next_target, subst.copy(), seen)
+            ) is not None:
+                return new_subst
+
+            # Appended too many elements
+            subst[pattern_var].pop()
+            seen.add(pattern_var)
+
+            return dfs(P, P_idx + 1, T, T_idx, subst.copy(), seen)
 
         case TokenTypes.ELLIPSIS:
             # Empty Case
@@ -117,6 +116,7 @@ def dfs(
             # Ellipsis Matches One or More Elements
             return dfs(P, P_idx, T, T_idx + 1, subst.copy(), seen)
 
+
 def matching(pattern: list[Token], target: list[int]) -> Substitution | None:
     substitution: Substitution = {}
     seen: set[str] = set()
@@ -125,7 +125,7 @@ def matching(pattern: list[Token], target: list[int]) -> Substitution | None:
 
 
 def main() -> None:
-    parser = create_parser("Simple DFS Matching", parse_pattern)
+    parser = create_parser("List DFS Matching", parse_pattern)
     args = parser.parse_args()
 
     setup_logging(args.log_level)
