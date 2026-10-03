@@ -1,7 +1,6 @@
 import logging
 import sys
 from argparse import ArgumentParser
-from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 
@@ -23,14 +22,33 @@ def parse_cli_list(input_list: str) -> list[int]:
     return [int(item.strip()) for item in list_values]
 
 
+def parse_pattern(pattern: str) -> list[Token]:
+    tokens: list[Token] = []
+
+    for elem in pattern.split(","):
+        if not (clean_elem := elem.strip()):
+            continue
+
+        match clean_elem:
+            case _ if clean_elem.isidentifier():
+                tokens.append(Token(TokenTypes.VAR, clean_elem))
+            case _ if clean_elem.isnumeric():
+                tokens.append(Token(TokenTypes.NUM, clean_elem))
+            case "...":
+                tokens.append(Token(TokenTypes.ELLIPSIS, clean_elem))
+            case _:
+                raise ValueError(f"Unrecognized token pattern: {clean_elem!r}")
+
+    return tokens
+
+
 def create_parser(
     prog_description: str,
-    pattern_parser: Callable[[str], Token],
 ) -> ArgumentParser:
     parser = ArgumentParser(prog=prog_description)
 
     parser.add_argument(
-        "pattern", metavar="PATTERN", type=pattern_parser, help="Takes an input pattern"
+        "pattern", metavar="PATTERN", type=parse_pattern, help="Takes an input pattern"
     )
 
     parser.add_argument(

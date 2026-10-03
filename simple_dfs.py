@@ -8,26 +8,6 @@ type Substitution = dict[str, int]
 logger = logging.getLogger(__name__)
 
 
-def parse_pattern(pattern: str) -> list[Token]:
-    tokens: list[Token] = []
-
-    for elem in pattern.split(","):
-        if not (clean_elem := elem.strip()):
-            continue
-
-        match clean_elem:
-            case _ if clean_elem.isidentifier():
-                tokens.append(Token(TokenTypes.VAR, clean_elem))
-            case _ if clean_elem.isnumeric():
-                tokens.append(Token(TokenTypes.NUM, clean_elem))
-            case "...":
-                tokens.append(Token(TokenTypes.ELLIPSIS, clean_elem))
-            case _:
-                raise ValueError(f"Unrecognized token pattern: {clean_elem!r}")
-
-    return tokens
-
-
 def get_target(targets: list[int], target_idx: int) -> str | None:
     return targets[target_idx] if target_idx < len(targets) else None
 
@@ -90,7 +70,7 @@ def matching(pattern: list[Token], target: list[int]) -> Substitution | None:
 
 
 def main() -> None:
-    parser = create_parser("Simple DFS Matching", parse_pattern)
+    parser = create_parser("Simple DFS Matching")
     args = parser.parse_args()
 
     setup_logging(args.log_level)
