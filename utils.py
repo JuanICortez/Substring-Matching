@@ -44,6 +44,7 @@ def parse_pattern(pattern: str) -> list[Token]:
 
 def create_parser(
     prog_description: str,
+    target_parser: callable[[str], list[int | tuple[int, int]]] = parse_cli_list
 ) -> ArgumentParser:
     parser = ArgumentParser(prog=prog_description)
 
@@ -54,7 +55,7 @@ def create_parser(
     parser.add_argument(
         "--target",
         metavar="TARGET",
-        type=parse_cli_list,
+        type=target_parser,
         help="List of intergers over which the pattern will be run",
     )
 
