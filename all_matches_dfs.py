@@ -99,7 +99,7 @@ def dfs(
                 yield from new_subst
 
 
-def matching(pattern: list[Token], target: list[int]) -> Substitution | None:
+def matching(pattern: list[Token], target: list[int]) -> Generator[Substitution, None, None]:
     substitution: Substitution = {}
     seen: set[str] = set()
 
@@ -127,3 +127,8 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+# Extender con ordenes parciales.
+# Calcular Transitive Closure de la relación de orden parcial.
+# El siguiente puede ser x. 
