@@ -162,3 +162,8 @@ if __name__ == "__main__":
 
 # Que condiciones tiene el match -> Version Declarativa
 # Que pasos hay que seguir para conseguir un match -> Version Algoritmica
+
+# x++; x++;
+# [(1, 1), (1, -)]
+
+# printf();
