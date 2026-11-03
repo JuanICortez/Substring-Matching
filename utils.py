@@ -1,12 +1,14 @@
 import logging
 import sys
 from argparse import ArgumentParser
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum, auto
 
 
 class TokenTypes(Enum):
     VAR = auto()
+    VALUE = auto()
     NUM = auto()
     ELLIPSIS = auto()
 
@@ -22,10 +24,35 @@ def parse_cli_list(input_list: str) -> list[int]:
     return [int(item.strip()) for item in list_values]
 
 
+def split_top_level(pattern: str) -> list[str]:
+    """Splits on commas outside of brackets and string literals."""
+    parts, depth, start, quote = [], 0, 0, None
+
+    for idx, char in enumerate(pattern):
+        if quote:
+            if char == quote:
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(pattern[start:idx])
+            start = idx + 1
+
+    if depth != 0 or quote:
+        raise ValueError(f"Unbalanced brackets or quotes in pattern: {pattern!r}")
+
+    parts.append(pattern[start:])
+    return parts
+
+
 def parse_pattern(pattern: str) -> list[Token]:
     tokens: list[Token] = []
 
-    for elem in pattern.split(","):
+    for elem in split_top_level(pattern):
         if not (clean_elem := elem.strip()):
             continue
 
@@ -37,14 +64,14 @@ def parse_pattern(pattern: str) -> list[Token]:
             case "...":
                 tokens.append(Token(TokenTypes.ELLIPSIS, clean_elem))
             case _:
-                raise ValueError(f"Unrecognized token pattern: {clean_elem!r}")
+                tokens.append(Token(TokenTypes.VALUE, clean_elem))
 
     return tokens
 
 
 def create_parser(
     prog_description: str,
-    target_parser: callable[[str], list[int | tuple[int, int]]] = parse_cli_list
+    target_parser: Callable[[str], list[int | tuple[int, int]]] = parse_cli_list
 ) -> ArgumentParser:
     parser = ArgumentParser(prog=prog_description)
 

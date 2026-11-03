@@ -135,7 +135,10 @@ if __name__ == "__main__":
 # Que pasos hay que seguir para conseguir un match -> Version Algoritmica
 
 
+# {1: a, 2: b}
 # x += 1; x += 2;
+#  a-1     b-2
+# (1,2), (2,-)
 
 #  {1: a, 2: b, 3: a}
 #  x++; printf(x); x++;
@@ -147,4 +150,9 @@ if __name__ == "__main__":
 #  a-1    b-2    c-3
 # (1,2), (2,3), (3,-)
 
-# 1, 
+# for(int x = 1; x < 10; x++) { ... }
+# x = 1
+# while (x < 10) {
+#     ...
+#     x++;
+# }

@@ -4,7 +4,7 @@ from collections.abc import Generator
 
 from utils import Token, TokenTypes, create_parser, setup_logging
 
-type Substitution = dict[str, list[int]]
+type Substitution = dict[str, int]
 type Relation = tuple[int, int]
 type Preds = dict[int, frozenset[int]]
 type State = tuple[int, frozenset[int], frozenset[tuple[str, int]]]
